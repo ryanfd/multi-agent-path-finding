@@ -1,7 +1,7 @@
 import heapq
 
 def move(loc, dir):
-    directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+    directions = [(0, -1), (1, 0), (0, 1), (-1, 0), (0, 0)] # directions can also include staying still
     return loc[0] + directions[dir][0], loc[1] + directions[dir][1]
 
 
@@ -54,6 +54,8 @@ def build_constraint_table(constraints, agent):
     #               for a more efficient constraint violation check in the 
     #               is_constrained function.
 
+    # constraint = {'agent': 0, 'loc': [(1,5)], 'time_step': 4}
+
     pass
 
 
@@ -100,11 +102,11 @@ def compare_nodes(n1, n2):
 
 
 def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
-    """ my_map      - binary obstacle map
-        start_loc   - start position
-        goal_loc    - goal position
-        agent       - the agent that is being re-planned
-        constraints - constraints defining where robot should or cannot go at each timestep
+    """ my_map          - binary obstacle map
+        start_loc       - start position
+        goal_loc        - goal position
+        agent           - the agent that is being re-planned
+        constraints     - constraints defining where robot should or cannot go at each timestep
     """
 
     ##############################
@@ -114,28 +116,32 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     open_list = []
     closed_list = dict()
     earliest_goal_timestep = 0
+    curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
-    root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None}
+    root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step' : curr_time_step}
     push_node(open_list, root)
-    closed_list[(root['loc'])] = root
+    closed_list[(root['loc'], root['time_step'])] = root
     while len(open_list) > 0:
         curr = pop_node(open_list)
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
         if curr['loc'] == goal_loc:
             return get_path(curr)
-        for dir in range(4):
+        curr_time_step += 1 # increment time
+        for dir in range(5):
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
             child = {'loc': child_loc,
                     'g_val': curr['g_val'] + 1,
                     'h_val': h_values[child_loc],
-                    'parent': curr}
+                    'parent': curr,
+                    'time_step' : curr_time_step}
+            # print("LOC:", child['loc'], "\nTIME:", child['time_step'], "\n--------")
             if (child['loc']) in closed_list:
                 existing_node = closed_list[(child['loc'])]
                 if compare_nodes(child, existing_node):
-                    closed_list[(child['loc'])] = child
+                    closed_list[(child['loc'], child['time_step'])] = child
                     push_node(open_list, child)
             else:
                 closed_list[(child['loc'])] = child
