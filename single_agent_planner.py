@@ -54,9 +54,10 @@ def build_constraint_table(constraints, agent):
     #               for a more efficient constraint violation check in the 
     #               is_constrained function.
 
-    # constraint = {'agent': 0, 'loc': [(1,5)], 'time_step': 4}
-
-    pass
+    table = dict()
+    for i in len(constraints):
+        table.update(constraints[i])
+    return table
 
 
 def get_location(path, time):
