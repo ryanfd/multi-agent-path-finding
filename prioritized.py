@@ -43,7 +43,13 @@ class PrioritizedPlanningSolver(object):
             #            * path contains the solution path of the current (i'th) agent, e.g., [(1,1),(1,2),(1,3)]
             #            * self.num_of_agents has the number of total agents
             #            * constraints: array of constraints to consider for future A* searches
-            constraints = [{'agent': 0, 'loc': [(1,5)], 'time_step': 4}]
+            constraints.append({'agent': None, 'loc': None, 'time_step': 0})
+            constraints.append({'agent': None, 'loc': None, 'time_step': 1})
+            constraints.append({'agent': None, 'loc': None, 'time_step': 2})
+            constraints.append({'agent': None, 'loc': None, 'time_step': 3})
+            constraints.append({'agent': 0, 'loc': [(1,5)], 'time_step': 4})
+            # for i in constraints:
+            #     print(i)
 
 
             ##############################

@@ -54,9 +54,9 @@ def build_constraint_table(constraints, agent):
     #               for a more efficient constraint violation check in the 
     #               is_constrained function.
 
-    table = dict()
-    for i in len(constraints):
-        table.update(constraints[i])
+    table = []
+    for i in constraints:
+        table.append(i)
     return table
 
 
@@ -85,7 +85,10 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               any given constraint. For efficiency the constraints are indexed in a constraint_table
     #               by time step, see build_constraint_table.
 
-    pass
+    if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
+        print(constraint_table[next_time])
+        return True
+    return False
 
 
 def push_node(open_list, node):
@@ -119,6 +122,7 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     earliest_goal_timestep = 0
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
+    constraints = build_constraint_table(constraints, agent) # build constraint table for root is generated
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step' : curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
