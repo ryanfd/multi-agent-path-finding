@@ -1,7 +1,7 @@
 import heapq
 
 def move(loc, dir):
-    directions = [(0, -1), (1, 0), (0, 1), (-1, 0), (0, 0)] # directions can also include staying still
+    directions = [(0, -1), (1, 0), (0, 1), (-1, 0)] 
     return loc[0] + directions[dir][0], loc[1] + directions[dir][1]
 
 
@@ -122,7 +122,9 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     earliest_goal_timestep = 0
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
-    constraints = build_constraint_table(constraints, agent) # build constraint table for root is generated
+    constraint_table = build_constraint_table(constraints, agent) # build constraint table for root is generated
+    for i in constraint_table:
+        print(i)
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step' : curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
@@ -133,7 +135,8 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         if curr['loc'] == goal_loc:
             return get_path(curr)
         curr_time_step += 1 # increment time
-        for dir in range(5):
+        for dir in range(4):
+            #if not is_constrained(curr['loc'], dir, curr_time_step, constraint_table):
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
