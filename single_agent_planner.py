@@ -85,9 +85,14 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               any given constraint. For efficiency the constraints are indexed in a constraint_table
     #               by time step, see build_constraint_table.
 
-    if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
-        print(constraint_table[next_time])
-        return True
+    # if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
+    #     print(constraint_table[next_time])
+    #     return True
+    # return False
+
+    for i in constraint_table:
+        if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
+            return True
     return False
 
 
@@ -123,8 +128,6 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
     constraint_table = build_constraint_table(constraints, agent) # build constraint table for root is generated
-    for i in constraint_table:
-        print(i)
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step' : curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
@@ -133,10 +136,13 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
         if curr['loc'] == goal_loc:
+            print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr['time_step'])
             return get_path(curr)
         curr_time_step += 1 # increment time
         for dir in range(4):
-            #if not is_constrained(curr['loc'], dir, curr_time_step, constraint_table):
+            # print(agent, "-", curr['loc'], "-", curr['time_step'])
+            if is_constrained(curr['loc'], dir, curr_time_step, constraint_table):
+                continue
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
