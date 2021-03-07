@@ -85,14 +85,14 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               any given constraint. For efficiency the constraints are indexed in a constraint_table
     #               by time step, see build_constraint_table.
 
-    # if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
-    #     print(constraint_table[next_time])
-    #     return True
-    # return False
+    i = 0
+    while i < len(constraint_table):
+        loc_range = len(constraint_table[i]['loc'])
+        for j in range(loc_range):
+            if next_time == constraint_table[i]['time_step'] and next_loc == constraint_table[i]['loc'][j]:
+                return True
+        i += 1
 
-    for i in constraint_table:
-        if next_time == constraint_table[next_time]['time_step'] and next_loc == constraint_table[next_time]['loc']:
-            return True
     return False
 
 
@@ -128,21 +128,21 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
     constraint_table = build_constraint_table(constraints, agent) # build constraint table for root is generated
-    root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step' : curr_time_step}
+    if agent == 0:
+        constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 4})
+        constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 10})
+    root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step': curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
     while len(open_list) > 0:
         curr = pop_node(open_list)
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
-        if curr['loc'] == goal_loc:
-            print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr['time_step'])
+        if curr['loc'] == goal_loc and curr_time_step >= 10:
+            print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
             return get_path(curr)
-        curr_time_step += 1 # increment time
+
         for dir in range(4):
-            # print(agent, "-", curr['loc'], "-", curr['time_step'])
-            if is_constrained(curr['loc'], dir, curr_time_step, constraint_table):
-                continue
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
@@ -151,7 +151,18 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
                     'h_val': h_values[child_loc],
                     'parent': curr,
                     'time_step' : curr_time_step}
-            # print("LOC:", child['loc'], "\nTIME:", child['time_step'], "\n--------")
+
+            # if constrained, increment time and re-search the same node
+            if is_constrained(curr['loc'], child['loc'], curr_time_step+1, constraint_table): 
+                # path contains waiting in place
+                new_child = {'loc': curr['loc'],
+                    'g_val': curr['g_val'],
+                    'h_val': h_values[curr['loc']],
+                    'parent': curr,
+                    'time_step' : curr_time_step}
+                push_node(open_list, new_child)
+                continue
+
             if (child['loc']) in closed_list:
                 existing_node = closed_list[(child['loc'])]
                 if compare_nodes(child, existing_node):
@@ -160,5 +171,7 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
             else:
                 closed_list[(child['loc'])] = child
                 push_node(open_list, child)
+
+        curr_time_step += 1 # increment time
 
     return None  # Failed to find solutions
