@@ -91,6 +91,8 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
         for j in range(loc_range):
             if next_time == constraint_table[i]['time_step'] and next_loc == constraint_table[i]['loc'][j]:
                 return True
+        if curr_loc == next_loc and next_time <= constraint_table[i]['time_step']:
+            return True
         i += 1
 
     return False
@@ -128,9 +130,9 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
     constraint_table = build_constraint_table(constraints, agent) # build constraint table for root is generated
-    if agent == 0:
-        constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 4})
-        constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 10})
+    # if agent == 0:
+    #     constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 4})
+    #     constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 10})
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step': curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
@@ -138,10 +140,11 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         curr = pop_node(open_list)
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
-        if curr['loc'] == goal_loc and curr_time_step >= 10:
+        if curr['loc'] == goal_loc:
             print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
             return get_path(curr)
 
+        constraint_count = 0
         for dir in range(4):
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
@@ -153,24 +156,16 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
                     'time_step' : curr_time_step}
 
             # if constrained, increment time and re-search the same node
-            if is_constrained(curr['loc'], child['loc'], curr_time_step+1, constraint_table): 
-                # path contains waiting in place
-                new_child = {'loc': curr['loc'],
-                    'g_val': curr['g_val'],
-                    'h_val': h_values[curr['loc']],
-                    'parent': curr,
-                    'time_step' : curr_time_step}
-                push_node(open_list, new_child)
-                continue
-
-            if (child['loc']) in closed_list:
-                existing_node = closed_list[(child['loc'])]
-                if compare_nodes(child, existing_node):
+            if not is_constrained(curr['loc'], child['loc'], curr_time_step+1, constraint_table): 
+                if (child['loc']) in closed_list:
+                    existing_node = closed_list[(child['loc'])]
+                    if compare_nodes(child, existing_node):
+                        closed_list[(child['loc'], child['time_step'])] = child
+                        push_node(open_list, child)
+                else:
                     closed_list[(child['loc'], child['time_step'])] = child
                     push_node(open_list, child)
-            else:
-                closed_list[(child['loc'])] = child
-                push_node(open_list, child)
+                
 
         curr_time_step += 1 # increment time
 
