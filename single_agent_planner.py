@@ -126,25 +126,24 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
 
     open_list = []
     closed_list = dict()
-    earliest_goal_timestep = 0
+    earliest_goal_timestep = 1
     curr_time_step = earliest_goal_timestep
     h_value = h_values[start_loc]
     constraint_table = build_constraint_table(constraints, agent) # build constraint table for root is generated
-    # if agent == 0:
-    #     constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 4})
-    #     constraint_table.append({'agent': 0, 'loc': [(1,5)], 'time_step': 10})
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step': curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
+    for i in constraint_table:
+        if agent == 1:
+            print(i)
     while len(open_list) > 0:
         curr = pop_node(open_list)
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
-        if curr['loc'] == goal_loc:
+        if curr['loc'] == goal_loc and not is_constrained(curr['loc'], goal_loc, curr_time_step+1, constraint_table):
             print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
             return get_path(curr)
 
-        constraint_count = 0
         for dir in range(4):
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
