@@ -11,9 +11,18 @@ def detect_collision(path1, path2):
     #           A vertex collision occurs if both robots occupy the same location at the same timestep
     #           An edge collision occurs if the robots swap their location at the same timestep.
     #           You should use "get_location(path, t)" to get the location of a robot at time t.
-    
+    prev_pos1 = None
+    prev_pos2 = None
+    for i in range(len(path1)):
+        if get_location(path2, i+1) == get_location(path1, i+1): # first vertex collision
+            return [path2[i], i+1]
+        if prev_pos1 != None and path1[i] == prev_pos2 and path2[i] == prev_pos1: # first edge collision
+            return [path1[i], path2[i], i+1]
 
-    pass
+        prev_pos = path1[i]
+        prev_pos2 = path2[i]
+
+    return None
 
 
 def detect_collisions(paths):
@@ -23,7 +32,21 @@ def detect_collisions(paths):
     #           causing the collision, and the timestep at which the collision occurred.
     #           You should use your detect_collision function to find a collision between two robots.
 
-    pass
+    detected_collision = detect_collision(paths[0], paths[1])
+    detected_collision_paths = []
+
+    for i in range(len(detected_collision)):
+        if i < len(detected_collision)-1:
+            detected_collision_paths.append(detected_collision[i])
+
+
+    first_collision = []
+    first_collision.append({'a1': 0, 
+                            'a2': 1, 
+                            'loc': detected_collision_paths, 
+                            'timestep': detected_collision[len(detected_collision)-1]})
+
+    return first_collision
 
 
 def standard_splitting(collision):
@@ -36,7 +59,16 @@ def standard_splitting(collision):
     #                          specified timestep, and the second constraint prevents the second agent to traverse the
     #                          specified edge at the specified timestep
 
-    pass
+    constraints = []
+
+    # vertex constraints
+    constraints.append({'agent': 0, 'loc': collision['loc'], 'time_step': collision['timestep']})
+    constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']})
+
+    # edge constraints
+    # constraints.append({'agent': 0, 'loc'})
+
+    return constraints
 
 
 def disjoint_splitting(collision):
@@ -132,6 +164,33 @@ class CBSSolver(object):
         #             3. Otherwise, choose the first collision and convert to a list of constraints (using your
         #                standard_splitting function). Add a new child node to your open list for each constraint
         #           Ensure to create a copy of any objects that your child nodes might inherit
+
+        while len(self.open_list) > 0:
+            curr = self.pop_node()
+
+            if len(curr['collisions']) == 0:
+                return self.paths
+
+            collision = curr['collisions'][0] # TO DO: NEED POP
+            constraints = standard_splitting(collision)
+            for constraint in constraints:
+                temp = {'cost': 0,
+                        'constraints': [],
+                        'paths': [],
+                        'collisions': []}
+                # for i in range(len(constraints)):
+                    # if constraint == curr['constraints']:
+                temp['constraints'].append(constraint)
+                print("HERE -", constraint)
+                temp['paths'] = curr['paths']           
+                agent = temp['constraints'][0]['agent']
+                path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], agent, temp['constraints'])
+                if len(path) > 0:
+                    temp['paths'] = path
+                    print(temp['paths'])
+                    temp['collisions'] = detect_collisions(temp['paths'])
+                    temp['cost'] = get_sum_of_cost(temp['paths'])
+                    self.push_node(temp)
 
         self.print_results(root)
         return root['paths']
