@@ -51,16 +51,35 @@ class PrioritizedPlanningSolver(object):
             # constraints.append({'agent': 1, 'loc':[(1, 4)], 'time_step': 2})
             
             prev_pos = None
-            for i in range(len(path)):
-                print(path[i], "-", i+1)
-                for j in range(self.num_of_agents):
-                    if j == 0:
+            for j in range(len(path)):
+                for k in range(self.num_of_agents):
+                    if k == 1:
                         # vertex constraints
-                        constraints.append({'agent': j+1, 'loc':[path[i]], 'time_step': i+1}) # define constraints for agent 1, agent 0 has priority
+                        constraints.append({'agent': k, 'loc': [path[j]], 'time_step': j+1})
 
-                        constraints.append({'agent': j+1, 'loc':[path[i], prev_pos], 'time_step': i+1}) # edge constraints
+                        # edge constraints
+                        if prev_pos != None:
+                            if constraints[0]['loc'][0] != (1, 1):
+                                constraints.append({'agent': k, 'loc':[path[j], prev_pos], 'time_step': j})
+                            else:
+                                constraints.append({'agent': k, 'loc':[path[j], prev_pos], 'time_step': j+1})
 
-                prev_pos = path[i]
+                prev_pos = path[j]
+
+
+
+
+
+            # for i in range(len(path)):
+            #     print(path[i], "-", i+1)
+            #     for j in range(self.num_of_agents):
+            #         if j == 0:
+            #             # vertex constraints
+            #             constraints.append({'agent': j+1, 'loc':[path[i]], 'time_step': i+1}) # define constraints for agent 1, agent 0 has priority
+
+            #             constraints.append({'agent': j+1, 'loc':[path[i], prev_pos], 'time_step': i+1}) # edge constraints
+
+            #     prev_pos = path[i]
 
 
 

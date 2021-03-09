@@ -133,9 +133,10 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     root = {'loc': start_loc, 'g_val': 0, 'h_val': h_value, 'parent': None, 'time_step': curr_time_step}
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
+
     for i in constraint_table:
-        if agent == 1:
-            print(i)
+        print(i)
+
     while len(open_list) > 0:
         curr = pop_node(open_list)
         #############################
