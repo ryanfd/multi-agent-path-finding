@@ -14,9 +14,9 @@ def detect_collision(path1, path2):
     prev_pos1 = None
     prev_pos2 = None
     for i in range(len(path1)):
-        if get_location(path2, i+1) == get_location(path1, i+1): # first vertex collision
+        if get_location(path2, i+1) == get_location(path1, i+1): # vertex collision
             return [path2[i], i+1]
-        if prev_pos1 != None and path1[i] == prev_pos2 and path2[i] == prev_pos1: # first edge collision
+        if prev_pos1 != None and path1[i] == prev_pos2 and path2[i] == prev_pos1: # edge collision
             return [path1[i], path2[i], i+1]
 
         prev_pos = path1[i]
@@ -39,7 +39,6 @@ def detect_collisions(paths):
         if i < len(detected_collision)-1:
             detected_collision_paths.append(detected_collision[i])
 
-
     first_collision = []
     first_collision.append({'a1': 0, 
                             'a2': 1, 
@@ -61,12 +60,17 @@ def standard_splitting(collision):
 
     constraints = []
 
-    # vertex constraints
+    # agent 1, vertex and edge collisions
     constraints.append({'agent': 0, 'loc': collision['loc'], 'time_step': collision['timestep']})
-    constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']})
 
-    # edge constraints
-    # constraints.append({'agent': 0, 'loc'})
+    # agent 2, vertex and edge collisions, edges are reversed
+    for i in range(len(collision['loc'])):
+        if len(collision['loc']) > 1:
+            loc1 = collision['loc'][0][0]
+            loc2 = collision['loc'][0][1]
+            constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep']})
+        else:
+            constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']})
 
     return constraints
 
@@ -181,7 +185,6 @@ class CBSSolver(object):
                 # for i in range(len(constraints)):
                     # if constraint == curr['constraints']:
                 temp['constraints'].append(constraint)
-                print("HERE -", constraint)
                 temp['paths'] = curr['paths']           
                 agent = temp['constraints'][0]['agent']
                 path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], agent, temp['constraints'])
