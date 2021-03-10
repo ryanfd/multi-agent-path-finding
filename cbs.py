@@ -175,22 +175,19 @@ class CBSSolver(object):
             if len(curr['collisions']) == 0:
                 return self.paths
 
-            collision = curr['collisions'][0] # TO DO: NEED POP
+            collision = curr['collisions'].pop(0)
             constraints = standard_splitting(collision)
             for constraint in constraints:
                 temp = {'cost': 0,
                         'constraints': [],
                         'paths': [],
                         'collisions': []}
-                # for i in range(len(constraints)):
-                    # if constraint == curr['constraints']:
                 temp['constraints'].append(constraint)
-                temp['paths'] = curr['paths']           
+                temp['paths'] = curr['paths']         
                 agent = temp['constraints'][0]['agent']
                 path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], agent, temp['constraints'])
                 if len(path) > 0:
-                    temp['paths'] = path
-                    print(temp['paths'])
+                    temp['paths'][agent] = path # replace path of agent with new path
                     temp['collisions'] = detect_collisions(temp['paths'])
                     temp['cost'] = get_sum_of_cost(temp['paths'])
                     self.push_node(temp)
