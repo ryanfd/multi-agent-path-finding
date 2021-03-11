@@ -51,11 +51,30 @@ class PrioritizedPlanningSolver(object):
             # constraints.append({'agent': 1, 'loc':[(1, 4)], 'time_step': 2})
             
             prev_pos = None
+            priority_goal = None
+            priority_goal_timestep = 0
             for j in range(len(path)):
                 for k in range(self.num_of_agents):
+                    if k == 0:
+                        if j == len(path)-1: # track pos and goal when priority reaches goal
+                            priority_goal = path[j]
+                            priority_goal_timestep = j+1
+                            constraints.append({'agent': k+1, 'loc': [priority_goal], 'time_step': j+2})
                     if k == 1:
+                        if j == len(path)-1:
+                            secondary_goal_timestep = j+1
+
                         # vertex constraints
                         constraints.append({'agent': k, 'loc': [path[j]], 'time_step': j+1})
+                        if priority_goal != None and priority_goal_timestep == 3: # secondary agent can't entire goal loc of priority and can't backtrack
+                            constraints.append({'agent': k, 'loc': [path[j-2]], 'time_step': priority_goal_timestep+1})
+                            constraints.append({'agent': k, 'loc': [path[j-1]], 'time_step': priority_goal_timestep+2})
+                            
+                            # constraints on future loc after priority goal has been reached
+                            index = j
+                            while index < len(path):
+                                constraints.append({'agent': k, 'loc': [priority_goal], 'time_step': priority_goal_timestep+3+index})
+                                index += 1
 
                         # edge constraints
                         if prev_pos != None:

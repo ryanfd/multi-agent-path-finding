@@ -71,6 +71,9 @@ def standard_splitting(collision):
             constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep']})
         else:
             constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']})
+    
+    for i in constraints:
+        print(i)
 
     return constraints
 
@@ -143,6 +146,7 @@ class CBSSolver(object):
                 'paths': [],
                 'collisions': []}
         for i in range(self.num_of_agents):  # Find initial path for each agent
+            print("Time through init loop -", i+1)
             path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i],
                           i, root['constraints'])
             if path is None:
@@ -168,7 +172,6 @@ class CBSSolver(object):
         #             3. Otherwise, choose the first collision and convert to a list of constraints (using your
         #                standard_splitting function). Add a new child node to your open list for each constraint
         #           Ensure to create a copy of any objects that your child nodes might inherit
-
         while len(self.open_list) > 0:
             curr = self.pop_node()
 
@@ -185,12 +188,13 @@ class CBSSolver(object):
                 temp['constraints'].append(constraint)
                 temp['paths'] = curr['paths']         
                 agent = temp['constraints'][0]['agent']
+                print("AGENT -",agent, "-", temp['paths'][agent])
                 path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], agent, temp['constraints'])
                 if len(path) > 0:
                     temp['paths'][agent] = path # replace path of agent with new path
-                    temp['collisions'] = detect_collisions(temp['paths'])
-                    temp['cost'] = get_sum_of_cost(temp['paths'])
-                    self.push_node(temp)
+                #     temp['collisions'] = detect_collisions(temp['paths'])
+                #     temp['cost'] = get_sum_of_cost(temp['paths'])
+        #             self.push_node(temp)
 
         self.print_results(root)
         return root['paths']
