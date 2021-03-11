@@ -185,7 +185,7 @@ class CBSSolver(object):
                         'constraints': [],
                         'paths': [],
                         'collisions': []}
-                temp['constraints'].append(constraint)
+                temp['constraints'].append(constraint) 
                 temp['paths'] = curr['paths']         
                 agent = temp['constraints'][0]['agent']
                 print("AGENT -",agent, "-", temp['paths'][agent])
