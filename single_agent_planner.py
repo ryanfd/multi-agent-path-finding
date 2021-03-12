@@ -94,6 +94,7 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
             # edge constraints
             if len(constraint_table[i]['loc']) > 1:
                 if curr_loc == constraint_table[i]['loc'][0] and next_loc == constraint_table[i]['loc'][1]:
+                    print("\nEDGE CONSTRAINT -", constraint_table[i]['loc'], "\n")
                     return True
         # at goal, wrong time
         if next_time <= constraint_table[i]['time_step'] and curr_loc == next_loc :

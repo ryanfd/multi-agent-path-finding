@@ -24,7 +24,7 @@ def detect_collision(path1, path2):
         if get_location(path1, i) == get_location(path2, i): # vertex collision
             return [get_location(path1, i), i]
         elif get_location(path1, i) == prev_pos2 and get_location(path2, i) == prev_pos1: # edge collision
-            return [get_location(path1, i), get_location(path2, i), i]
+            return [get_location(path1, i), get_location(path2, i), i+1]
         
         prev_pos1 = get_location(path1, i)
         prev_pos2 = get_location(path2, i)
@@ -53,7 +53,7 @@ def detect_collisions(paths):
                                 'timestep': detected_collision[len(detected_collision)-1]})
         return found_collision
 
-    return None
+    return []
 
 
 def standard_splitting(collision):
@@ -198,6 +198,7 @@ class CBSSolver(object):
                 agent = constraint['agent']
                 path = a_star(self.my_map, self.starts[agent], self.goals[agent], self.heuristics[agent], agent, child['constraints'])
                 if path != None and len(path) > 0:
+                    print("TESTING:", len([]))
                     child['paths'][agent] = path
                     print("PATHS:", child['paths'])
                     child['collisions'] = detect_collisions(child['paths'])
