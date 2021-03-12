@@ -59,14 +59,17 @@ class PrioritizedPlanningSolver(object):
                         if j == len(path)-1: # track pos and goal when priority reaches goal
                             priority_goal = path[j]
                             priority_goal_timestep = j+1
-                            constraints.append({'agent': k+1, 'loc': [priority_goal], 'time_step': j+2})
+                            print("HERE")
+                            constraints.append({'agent': k+1, 'loc': [priority_goal], 'time_step': priority_goal_timestep+1})
                     if k == 1:
                         if j == len(path)-1:
                             secondary_goal_timestep = j+1
 
                         # vertex constraints
                         constraints.append({'agent': k, 'loc': [path[j]], 'time_step': j+1})
-                        if priority_goal != None and priority_goal_timestep == 3: # secondary agent can't entire goal loc of priority and can't backtrack
+                        if priority_goal != None and priority_goal_timestep == 3: # secondary agent can't enter goal loc of priority and can't backtrack
+                            print("PRIORITY:", path[j-2], "-", priority_goal_timestep+1)
+                            print("PRIORITY:", path[j-1], "-", priority_goal_timestep+2)
                             constraints.append({'agent': k, 'loc': [path[j-2]], 'time_step': priority_goal_timestep+1})
                             constraints.append({'agent': k, 'loc': [path[j-1]], 'time_step': priority_goal_timestep+2})
                             
