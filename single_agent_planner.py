@@ -94,21 +94,10 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
             # edge constraints
             if len(constraint_table[i]['loc']) > 1:
                 if curr_loc == constraint_table[i]['loc'][0] and next_loc == constraint_table[i]['loc'][1]:
-                    print("\nEDGE CONSTRAINT -", constraint_table[i]['loc'], "\n")
                     return True
         # at goal, wrong time
         if next_time <= constraint_table[i]['time_step'] and curr_loc == next_loc :
             return True
-
-    # i = 0
-    # while i < len(constraint_table):
-    #     loc_range = len(constraint_table[i]['loc'])
-    #     for j in range(loc_range):
-    #         if next_time == constraint_table[i]['time_step'] and next_loc == constraint_table[i]['loc'][j]:
-    #             return True
-    #     if curr_loc == next_loc and next_time <= constraint_table[i]['time_step']:
-    #         return True
-    #     i += 1
 
     return False
 
@@ -149,8 +138,8 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     push_node(open_list, root)
     closed_list[(root['loc'], root['time_step'])] = root
 
-    for i in constraint_table:
-        print("[A_STAR] CONSTRAINTS:", i)
+    # for i in constraint_table:
+    #     print("[A_STAR] CONSTRAINTS:", i)
 
     while len(open_list) > 0:
         curr = pop_node(open_list)
@@ -158,15 +147,24 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         # Task 1.4: Adjust the goal test condition to handle goal constraints
         if curr['loc'] == goal_loc and not is_constrained(curr['loc'], goal_loc, curr_time_step+1, constraint_table):
             print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
+            print("GOAL PATH", get_path(curr))
             return get_path(curr)
 
         for dir in range(4):
             child_loc = move(curr['loc'], dir)
-            if my_map[child_loc[0]][child_loc[1]]:
+
+            try:
+                if my_map[child_loc[0]][child_loc[1]]: # getting index error on loc (8, 6)
+                    continue
+            except IndexError:
                 continue
-            # print("\nCHILD LOCATION:", child_loc, "\n")
-            # if child_loc[0] < 0 or child_loc[1] < 0:
+
+            # if child_loc == (8, 6):
             #     continue
+            # if my_map[child_loc[0]][child_loc[1]]:
+            #     continue
+            if child_loc[1] < 0 or child_loc[0] < 0: # getting errors with loc (1, -1)
+                continue
             child = {'loc': child_loc,
                     'g_val': curr['g_val'] + 1,
                     'h_val': h_values[child_loc],
@@ -175,13 +173,14 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
 
             # if constrained, increment time and re-search the same node
             if not is_constrained(curr['loc'], child['loc'], curr_time_step+1, constraint_table): 
-                if (child['loc']) in closed_list:
+                if (child['loc'], child['time_step']) in closed_list:
                     existing_node = closed_list[(child['loc'])]
                     if compare_nodes(child, existing_node):
                         closed_list[(child['loc'], child['time_step'])] = child
                         push_node(open_list, child)
                 else:
                     closed_list[(child['loc'], child['time_step'])] = child
+                    # print("\nchild:", child)
                     push_node(open_list, child)
 
         curr_time_step += 1 # increment time

@@ -176,16 +176,14 @@ class CBSSolver(object):
         #             3. Otherwise, choose the first collision and convert to a list of constraints (using your
         #                standard_splitting function). Add a new child node to your open list for each constraint
         #           Ensure to create a copy of any objects that your child nodes might inherit
-        count = 1
+
         while len(self.open_list) > 0:
-            print("\ncount:", count, "\n")
             curr = self.pop_node()
 
             if len(curr['collisions']) == 0: # paths found
                 return curr['paths']
 
             collision = curr['collisions'].pop(0)
-            print("FIRST COLLISION:", collision)
             constraints = standard_splitting(collision)
             for constraint in constraints:
                 child = {'cost': 0,
@@ -198,17 +196,12 @@ class CBSSolver(object):
                 agent = constraint['agent']
                 path = a_star(self.my_map, self.starts[agent], self.goals[agent], self.heuristics[agent], agent, child['constraints'])
                 if path != None and len(path) > 0:
-                    print("TESTING:", len([]))
                     child['paths'][agent] = path
-                    print("PATHS:", child['paths'])
                     child['collisions'] = detect_collisions(child['paths'])
                     child['cost'] = get_sum_of_cost(child['paths'])
                     self.push_node(child)
                 # end of if statement
             # end of for loop
-
-            print(len(self.open_list))
-            count += 1
         # end of while loop
 
         self.print_results(root)
