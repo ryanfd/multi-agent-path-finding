@@ -16,7 +16,7 @@ def detect_collision(path1, path2):
     for i in range(len(path1)):
         if get_location(path2, i) == get_location(path1, i): # vertex collision
             return [get_location(path2, i), i]
-        if prev_pos1 != None and path1[i] == prev_pos2 and path2[i] == prev_pos1: # edge collision
+        if get_location(path1, i) == prev_pos2 and get_location(path2, i) == prev_pos1: # edge collision
             return [get_location(path1, i), get_location(path2, i), i]
 
         prev_pos1 = get_location(path1, i)
@@ -66,14 +66,17 @@ def standard_splitting(collision):
 
     # agent 2, vertex and edge collisions, edges are reversed
     if len(collision['loc']) > 1:
+        print("EVER GET HERE?????????????????????????????????????????????????????")
         loc1 = collision['loc'][0]
         loc2 = collision['loc'][1]
-        constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep']+1})
+        constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep']+2})
     else:
-        constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']+1})
-    
+        constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']+2})
+
+    print("\nCONSTRAINTS:")
     for i in constraints:
         print(i)
+    print("\n")
 
     return constraints
 
@@ -172,15 +175,12 @@ class CBSSolver(object):
         #             3. Otherwise, choose the first collision and convert to a list of constraints (using your
         #                standard_splitting function). Add a new child node to your open list for each constraint
         #           Ensure to create a copy of any objects that your child nodes might inherit
-
         while len(self.open_list) > 0:
             curr = self.pop_node()
-            # print("CURR1:", curr['paths'][0])
-            # print("CURR2:", curr['paths'][1])
 
             if len(curr['collisions']) == 0:
                 return self.paths
-
+        
             collision = curr['collisions'].pop(0)
             constraints = standard_splitting(collision)
             for constraint in constraints:
@@ -188,17 +188,18 @@ class CBSSolver(object):
                         'constraints': [],
                         'paths': [],
                         'collisions': []}
+                # temp['constraints'] = curr['constraints']
                 temp['constraints'].append(constraint) 
+                for i in temp['constraints']:
+                    print(i)
                 temp['paths'] = curr['paths']      
                 agent = temp['constraints'][0]['agent']
                 path = a_star(self.my_map, self.starts[agent], self.goals[agent], self.heuristics[agent], agent, temp['constraints'])
-                print(path)
+                print("PATHHHHHHHHHH:", path)
                 if len(path) > 0:
                     temp['paths'][agent] = path # replace path of agent with new path
                     temp['collisions'] = detect_collisions(temp['paths'])
                     temp['cost'] = get_sum_of_cost(temp['paths'])
-                    print("HERE -", temp['paths'])
-                    print(temp['collisions'])
                     self.push_node(temp)
 
         self.print_results(root)

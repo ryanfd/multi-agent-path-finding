@@ -144,13 +144,14 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         if curr['loc'] == goal_loc and not is_constrained(curr['loc'], goal_loc, curr_time_step+1, constraint_table):
             print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
             return get_path(curr)
+        curr_time_step += 1 # increment time
 
         for dir in range(4):
             child_loc = move(curr['loc'], dir)
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
-            if child_loc[0] < 0 or child_loc[1] < 0:
-                continue
+            # if child_loc[0] < 0 or child_loc[1] < 0:
+            #     continue
             child = {'loc': child_loc,
                     'g_val': curr['g_val'] + 1,
                     'h_val': h_values[child_loc],
@@ -168,7 +169,5 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
                     closed_list[(child['loc'], child['time_step'])] = child
                     push_node(open_list, child)
                 
-
-        curr_time_step += 1 # increment time
 
     return None  # Failed to find solutions
