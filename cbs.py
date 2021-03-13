@@ -69,15 +69,15 @@ def standard_splitting(collision):
     constraints = []
 
     # agent 0 vertex/edge collision
-    constraints.append({'agent': 0, 'loc': collision['loc'], 'time_step': collision['timestep']}) 
+    constraints.append({'agent': 0, 'loc': collision['loc'], 'time_step': collision['timestep'], 'positive': False}) 
 
     # agent 1 vertex/edge collision
     if len(collision['loc']) > 1:
         loc1 = collision['loc'][0]
         loc2 = collision['loc'][1]
-        constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep']}) # edge collision
+        constraints.append({'agent': 1, 'loc': [loc2, loc1], 'time_step': collision['timestep'], 'positive': False}) # edge collision
     else:
-        constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep']}) # vertex collision
+        constraints.append({'agent': 1, 'loc': collision['loc'], 'time_step': collision['timestep'], 'positive': False}) # vertex collision
 
     return constraints
 
@@ -93,7 +93,12 @@ def disjoint_splitting(collision):
     #                          specified edge at the specified timestep
     #           Choose the agent randomly
 
-    pass
+    constraints = standard_splitting(collision)
+    agent = random.randint(0, 1)
+    constraints[agent]['positive'] = True
+    print("AGENT:", agent)
+
+    return constraints
 
 
 class CBSSolver(object):
@@ -166,7 +171,7 @@ class CBSSolver(object):
 
         # Task 3.2: Testing
         for collision in root['collisions']:
-            print(standard_splitting(collision))
+            print(disjoint_splitting(collision))
 
         ##############################
         # Task 3.3: High-Level Search
@@ -192,10 +197,12 @@ class CBSSolver(object):
                         'collisions': []}
                 child['constraints'] = curr['constraints']
                 child['constraints'].append(constraint)
+                print("CONSTRAINTS:", child['constraints'])
                 child['paths'] = curr['paths']
                 agent = constraint['agent']
                 path = a_star(self.my_map, self.starts[agent], self.goals[agent], self.heuristics[agent], agent, child['constraints'])
                 if path != None and len(path) > 0:
+                    # if child['constraints'][agent]['positive'] == False:
                     child['paths'][agent] = path
                     child['collisions'] = detect_collisions(child['paths'])
                     child['cost'] = get_sum_of_cost(child['paths'])

@@ -56,6 +56,8 @@ def build_constraint_table(constraints, agent):
 
     table = []
     for i in constraints:
+        if len(i) == 3: # i['positive'] does not exist
+            i['positive'] = False
         table.append(i)
     return table
 
@@ -85,16 +87,25 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               any given constraint. For efficiency the constraints are indexed in a constraint_table
     #               by time step, see build_constraint_table.
 
+
     for i in range(len(constraint_table)):
         if next_time == constraint_table[i]['time_step']:
             # vertex constraints
             if len(constraint_table[i]['loc']) == 1:
                 if next_loc == constraint_table[i]['loc'][0]:
-                    return True
+                    # positive constraints
+                    if constraint_table[i]['positive'] == True:
+                        return False
+                    else:
+                        return True
             # edge constraints
             if len(constraint_table[i]['loc']) > 1:
                 if curr_loc == constraint_table[i]['loc'][0] and next_loc == constraint_table[i]['loc'][1]:
-                    return True
+                    # positive constraints
+                    if constraint_table[i]['positive'] == True:
+                        return False
+                    else:
+                        return True
         # at goal, wrong time
         if next_time <= constraint_table[i]['time_step'] and curr_loc == next_loc :
             return True
@@ -147,7 +158,6 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
         # Task 1.4: Adjust the goal test condition to handle goal constraints
         if curr['loc'] == goal_loc and not is_constrained(curr['loc'], goal_loc, curr_time_step+1, constraint_table):
             print("GOAL REACHED:", agent, "-", curr['loc'], "-", curr_time_step)
-            print("GOAL PATH", get_path(curr))
             return get_path(curr)
 
         for dir in range(4):

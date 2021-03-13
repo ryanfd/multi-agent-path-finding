@@ -59,7 +59,6 @@ class PrioritizedPlanningSolver(object):
                         if j == len(path)-1: # track pos and goal when priority reaches goal
                             priority_goal = path[j]
                             priority_goal_timestep = j+1
-                            print("HERE")
                             constraints.append({'agent': k+1, 'loc': [priority_goal], 'time_step': priority_goal_timestep+1})
                     if k == 1:
                         if j == len(path)-1:
