@@ -96,9 +96,21 @@ def disjoint_splitting(collision):
     constraints = standard_splitting(collision)
     agent = random.randint(0, 1)
     constraints[agent]['positive'] = True
-    print("AGENT:", agent)
+    # print("AGENT:", agent)
 
     return constraints
+
+# helper function
+def paths_violate_constraint(paths, constraint, num_of_agents):
+    # find agents with negative constraints
+
+    agents = []
+
+    for i in range(num_of_agents):
+        if i != constraint['agent'] and constraint['positive'] == True:
+            agents.append(i)
+
+    return agents
 
 
 class CBSSolver(object):
@@ -186,6 +198,9 @@ class CBSSolver(object):
             curr = self.pop_node()
 
             if len(curr['collisions']) == 0: # paths found
+                print("PATH REACHED:")
+                for i in curr['paths']:
+                    print(i)
                 return curr['paths']
 
             collision = curr['collisions'].pop(0)
@@ -197,12 +212,11 @@ class CBSSolver(object):
                         'collisions': []}
                 child['constraints'] = curr['constraints']
                 child['constraints'].append(constraint)
-                print("CONSTRAINTS:", child['constraints'])
                 child['paths'] = curr['paths']
+                agents = paths_violate_constraint(curr['paths'], constraint, self.num_of_agents) # disjoint splitting
                 agent = constraint['agent']
                 path = a_star(self.my_map, self.starts[agent], self.goals[agent], self.heuristics[agent], agent, child['constraints'])
                 if path != None and len(path) > 0:
-                    # if child['constraints'][agent]['positive'] == False:
                     child['paths'][agent] = path
                     child['collisions'] = detect_collisions(child['paths'])
                     child['cost'] = get_sum_of_cost(child['paths'])
